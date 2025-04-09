@@ -53,7 +53,6 @@ public class LocalFileContentAdapter implements ContentAdapter {
         return localFileMap.get(fileKey);
     }
 
-
     @Override
     public Content getContent(final ContentRequest contentRequest) {
         boolean isValid = validateRequest(contentRequest);
@@ -62,12 +61,12 @@ public class LocalFileContentAdapter implements ContentAdapter {
         }
         try {
             byte[] content = readByBytesRange(contentRequest);
-            return Content.builder().content(content).contentLength((long) content.length).rangeStart(contentRequest.getRangeStart()).rangeEnd(contentRequest.getRangeEnd()).build();
+            return Content.builder().content(content).contentLength((long) content.length)
+                    .rangeStart(contentRequest.getRangeStart()).rangeEnd(contentRequest.getRangeEnd()).build();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-
 
     /**
      * read the bytes of the file by the range.
@@ -97,14 +96,17 @@ public class LocalFileContentAdapter implements ContentAdapter {
      */
     @Override
     public Long getContentSize(ContentRequest contentRequest) {
-        return Optional.ofNullable(contentRequest).map(_ -> Paths.get(getFilePath(localFilePath, contentRequest.getFilePath(), contentRequest.getFileName()))).map(this::sizeFromFile).orElse(0L);
+        return Optional.ofNullable(contentRequest)
+                .map(request -> Paths.get(getFilePath(localFilePath, request.getFilePath(), request.getFileName())))
+                .map(this::sizeFromFile).orElse(0L);
     }
 
     @Override
     public List<Content> findAllContents() {
         Path path = Paths.get(new File(localFilePath).getAbsolutePath());
         try (Stream<Path> stream = Files.walk(path, 10)) {
-            return stream.filter(file -> !Files.isDirectory(file)).map(this::prepareContent).filter(Objects::nonNull).collect(Collectors.toList());
+            return stream.filter(file -> !Files.isDirectory(file)).map(this::prepareContent).filter(Objects::nonNull)
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -137,7 +139,9 @@ public class LocalFileContentAdapter implements ContentAdapter {
             byte[] encodedByte = encoder.encode(basicFileAttributes.fileKey().toString().getBytes());
             UUID uuid = UUID.nameUUIDFromBytes(encodedByte);
 
-            Content content = Content.builder().contentName(fileName).objectKey(uuid.toString()).contentPath(contentPath).contentType(extension).totalContentSize(basicFileAttributes.size()).build();
+            Content content = Content.builder().contentName(fileName).objectKey(uuid.toString())
+                    .contentPath(contentPath).contentType(extension).totalContentSize(basicFileAttributes.size())
+                    .build();
             localFileMap.put(uuid.toString(), content);
             return content;
         }
