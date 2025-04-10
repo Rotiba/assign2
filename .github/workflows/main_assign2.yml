@@ -62,5 +62,5 @@ jobs:
         with:
           app-name: 'assign2'
           slot-name: 'Production'
-          package: '*.jar'
+          package: 'assign2-*.jar'
           
